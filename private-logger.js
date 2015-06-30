@@ -49,20 +49,29 @@ function setCategory(logFile, categoryName) {
           	"pattern": "%m"
       	}
 	};
+
+    // log folder must exist
 	var folder = path.dirname(logFile);
 	if (!fs.existsSync(folder)) {
 		throw new Error("folder does not exists: " + folder);
 	}
+
+    // setup only for the pre-defined categories
 	var cetegory = cetegories[categoryName];
-	if (cetegory != undefined) {
-		module.exports[categoryName] = cetegory;
-		if (!log4js.appenderMakers[config.type]) {
-			log4js.loadAppender(config.type);
-		}
-		var appender = log4js.appenderMakers[config.type](config);
-		log4js.addAppender(appender, categoryName);
-		return cetegory;
-	}
+	if (cetegory == undefined) {
+        throw new Error("no pre-defined category: " + categoryName);
+    }
+
+    // load and add the appender
+    if (!log4js.appenderMakers[config.type]) {
+        log4js.loadAppender(config.type);
+    }
+    var appender = log4js.appenderMakers[config.type](config);
+    log4js.addAppender(appender, categoryName);
+
+    // export the logger
+    module.exports[categoryName] = cetegory;
+    return cetegory;
 }
 
 module.exports = {
